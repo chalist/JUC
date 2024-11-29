@@ -23,7 +23,7 @@ Your JSON file should be an array of objects containing user data. Example:
 ```json
 [
     {
-        "name": "John Doe",
+        "username": "john-doe",
         "email": "john@example.com",
         "first_name": "John",
         "last_name": "Doe",
