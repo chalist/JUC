@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: JSON User Creator
+ * Plugin Name: JSON User Creator code
  * Plugin URI: https://github.com/chalist/json-user-creator
  * Description: Bulk create WordPress users from a JSON file with support for Persian/Arabic text conversion
  * Version: 1.0.0
@@ -35,7 +35,7 @@ if (!defined('ABSPATH')) {
 function juc_add_admin_menu()
 {
     add_menu_page(
-        'JSON User Creator',
+        'JSON User Creator Code',
         'JUC',
         'manage_options',
         'json-user-creator',
@@ -90,15 +90,15 @@ function juc_handle_form_submission()
             'juc_upload_users'
         )
     ) {
-        wp_die('Security check failed. Please try again.');
+        wp_die(__('Security check failed. Please try again.', 'json-to-users'));
     }
 
     // Verify user capabilities
     if (!current_user_can('manage_options')) {
-        wp_die('Unauthorized access');
+        wp_die(__('Unauthorized access', 'json-to-users'));
     }
 
-    // Check if file was uploaded and all required indices exist
+    // Check file upload
     if (!isset($_FILES['json_file']) || 
         !isset($_FILES['json_file']['error']) || 
         !isset($_FILES['json_file']['tmp_name']) ||
@@ -108,22 +108,33 @@ function juc_handle_form_submission()
         add_settings_error(
             'json_user_creator',
             'no_file',
-            'No file was uploaded or there was an upload error.',
+            __('No file was uploaded or there was an upload error.', 'json-to-users'),
             'error'
         );
         return;
     }
 
-    // Read and parse JSON file with sanitization
+    // Read and parse JSON file
     $tmp_file = sanitize_text_field(wp_unslash($_FILES['json_file']['tmp_name']));
-    $json_content = $wp_filesystem->get_contents($tmp_file);
+    $json_content = file_get_contents($tmp_file);
+    
+    if (false === $json_content) {
+        add_settings_error(
+            'json_user_creator',
+            'read_error',
+            __('Could not read the uploaded file.', 'json-to-users'),
+            'error'
+        );
+        return;
+    }
+
     $users_data = json_decode($json_content, true);
 
     if (json_last_error() !== JSON_ERROR_NONE) {
         add_settings_error(
             'json_user_creator',
             'invalid_json',
-            'Invalid JSON file format.',
+            __('Invalid JSON file format.', 'json-to-users'),
             'error'
         );
         return;
