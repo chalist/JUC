@@ -1,10 +1,30 @@
 <?php
-/*
-Plugin Name: JSON User Creator
-Description: Create WordPress users from a JSON file
-Version: 1.0
-Author: Chalist
-*/
+/**
+ * Plugin Name: JSON User Creator
+ * Plugin URI: https://github.com/chalist/json-user-creator
+ * Description: Bulk create WordPress users from a JSON file with support for Persian/Arabic text conversion
+ * Version: 1.0.0
+ * Author: Chalist
+ * Author URI: https://github.com/chalist
+ * Text Domain: json-to-users
+ * Domain Path: /languages
+ * License: GPL v2 or later
+ * License URI: http://www.gnu.org/licenses/gpl-2.0.html
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+global $wp_filesystem;
+require_once(ABSPATH . 'wp-admin/includes/file.php');
+WP_Filesystem();
 
 // Prevent direct access to this file
 if (!defined('ABSPATH')) {
@@ -63,13 +83,28 @@ function juc_handle_form_submission()
         return;
     }
 
+    // Add nonce verification with proper sanitization
+    if (!isset($_POST['juc_nonce']) || 
+        !wp_verify_nonce(
+            sanitize_text_field(wp_unslash($_POST['juc_nonce'])), 
+            'juc_upload_users'
+        )
+    ) {
+        wp_die('Security check failed. Please try again.');
+    }
+
     // Verify user capabilities
     if (!current_user_can('manage_options')) {
         wp_die('Unauthorized access');
     }
 
-    // Check if file was uploaded
-    if (!isset($_FILES['json_file']) || $_FILES['json_file']['error'] !== UPLOAD_ERR_OK) {
+    // Check if file was uploaded and all required indices exist
+    if (!isset($_FILES['json_file']) || 
+        !isset($_FILES['json_file']['error']) || 
+        !isset($_FILES['json_file']['tmp_name']) ||
+        $_FILES['json_file']['error'] !== UPLOAD_ERR_OK ||
+        empty($_FILES['json_file']['tmp_name'])
+    ) {
         add_settings_error(
             'json_user_creator',
             'no_file',
@@ -79,8 +114,9 @@ function juc_handle_form_submission()
         return;
     }
 
-    // Read and parse JSON file
-    $json_content = file_get_contents($_FILES['json_file']['tmp_name']);
+    // Read and parse JSON file with sanitization
+    $tmp_file = sanitize_text_field(wp_unslash($_FILES['json_file']['tmp_name']));
+    $json_content = $wp_filesystem->get_contents($tmp_file);
     $users_data = json_decode($json_content, true);
 
     if (json_last_error() !== JSON_ERROR_NONE) {
@@ -164,7 +200,7 @@ function juc_handle_form_submission()
                         $role = 'editor';
                         break;
                 }
-encoding:             }
+            }
 
             // Create user
             $userdata = array(
@@ -260,7 +296,7 @@ function juc_admin_page()
         foreach ($settings_errors as $error) {
             $class = $error['type'] === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800';
         ?>
-            <div class="rounded-md p-4 mb-4 <?php echo $class; ?>">
+            <div class="rounded-md p-4 mb-4 <?php echo esc_attr($class); ?>">
                 <p class="text-sm"><?php echo esc_html($error['message']); ?></p>
             </div>
         <?php
@@ -269,6 +305,8 @@ function juc_admin_page()
 
         <div class="main-container">
             <form method="post" enctype="multipart/form-data" class="space-y-4">
+                <?php wp_nonce_field('juc_upload_users', 'juc_nonce'); ?>
+                
                 <!-- File Input Section -->
                 <div class="space-y-2">
 
@@ -433,7 +471,7 @@ function juc_persian_to_english_slug($string)
         'ف' => 'f',
         'ق' => 'gh',
         'ک' => 'k',
-        'گ' => 'g',
+        '' => 'g',
         'ل' => 'l',
         'م' => 'm',
         'ن' => 'n',
@@ -500,16 +538,41 @@ function juc_get_role_from_type($user_type)
 // Update the process function to use the slugify function
 function juc_process_json_file()
 {
+    // Check if our form was submitted and verify nonce
+    if (!isset($_POST['submit_json_users']) || 
+        !isset($_POST['juc_nonce']) || 
+        !wp_verify_nonce(
+            sanitize_text_field(wp_unslash($_POST['juc_nonce'])), 
+            'juc_upload_users'
+        )
+    ) {
+        echo '<div class="mt-4 p-4 bg-red-100 text-red-700 rounded-lg"><p>Security check failed</p></div>';
+        return;
+    }
+
+    // Verify user capabilities
     if (!current_user_can('manage_options')) {
         wp_die('Unauthorized access');
     }
 
-    if (!isset($_FILES['json_file'])) {
-        echo '<div class="mt-4 p-4 bg-red-100 text-red-700 rounded-lg"><p>No file uploaded</p></div>';
+    // Check if file was uploaded and all required indices exist
+    if (!isset($_FILES['json_file']) || 
+        !isset($_FILES['json_file']['error']) || 
+        !isset($_FILES['json_file']['tmp_name']) ||
+        $_FILES['json_file']['error'] !== UPLOAD_ERR_OK ||
+        empty($_FILES['json_file']['tmp_name'])
+    ) {
+        echo '<div class="mt-4 p-4 bg-red-100 text-red-700 rounded-lg"><p>No file uploaded or upload error</p></div>';
         return;
     }
 
-    $file_content = file_get_contents($_FILES['json_file']['tmp_name']);
+    // Replace file_get_contents with WP_Filesystem
+    global $wp_filesystem;
+    require_once(ABSPATH . 'wp-admin/includes/file.php');
+    WP_Filesystem();
+    $file_content = $wp_filesystem->get_contents(
+        sanitize_text_field(wp_unslash($_FILES['json_file']['tmp_name']))
+    );
     $users = json_decode($file_content, true);
 
     if (json_last_error() !== JSON_ERROR_NONE) {
@@ -520,30 +583,55 @@ function juc_process_json_file()
     $created = 0;
     $errors = 0;
 
-    // Get the field mappings
-    $map_user_login = $_POST['map_user_login'];
-    $map_user_email = $_POST['map_user_email'];
-    $map_first_name = $_POST['map_first_name'];
-    $map_last_name = $_POST['map_last_name'];
-    $default_role = $_POST['default_role'];
+    // Get the field mappings with proper validation and sanitization
+    $map_user_login = isset($_POST['map_user_login']) 
+        ? sanitize_text_field(wp_unslash($_POST['map_user_login'])) 
+        : '';
+    $map_user_email = isset($_POST['map_user_email']) 
+        ? sanitize_text_field(wp_unslash($_POST['map_user_email'])) 
+        : '';
+    $map_first_name = isset($_POST['map_first_name']) 
+        ? sanitize_text_field(wp_unslash($_POST['map_first_name'])) 
+        : '';
+    $map_last_name = isset($_POST['map_last_name']) 
+        ? sanitize_text_field(wp_unslash($_POST['map_last_name'])) 
+        : '';
+    $default_role = isset($_POST['default_role']) 
+        ? sanitize_text_field(wp_unslash($_POST['default_role'])) 
+        : 'subscriber';
+
+    // Validate that required mappings are provided
+    if (empty($map_user_login)) {
+        echo '<div class="mt-4 p-4 bg-red-100 text-red-700 rounded-lg"><p>Username mapping is required</p></div>';
+        return;
+    }
 
     // Handle custom role creation
-    if (empty($default_role) && !empty($_POST['custom_role_name'])) {
-        $role_name = sanitize_text_field($_POST['custom_role_name']);
-        $role_slug = sanitize_title($role_name);
+    if (empty($default_role) && isset($_POST['custom_role_name'])) {
+        // Unslash and sanitize the role name
+        $custom_role_name = sanitize_text_field(wp_unslash($_POST['custom_role_name']));
+        $role_slug = sanitize_title($custom_role_name);
 
         // Create the role if it doesn't exist
         if (!role_exists($role_slug)) {
             // Get selected capabilities
             $capabilities = array();
-            if (!empty($_POST['custom_role_caps']) && is_array($_POST['custom_role_caps'])) {
-                foreach ($_POST['custom_role_caps'] as $cap) {
-                    $capabilities[sanitize_text_field($cap)] = true;
+            if (isset($_POST['custom_role_caps'])) {
+                // Sanitize and validate the array
+                $custom_role_caps = array_map(
+                    'sanitize_text_field',
+                    wp_unslash((array) $_POST['custom_role_caps'])
+                );
+                
+                foreach ($custom_role_caps as $cap) {
+                    if (!empty($cap)) {
+                        $capabilities[$cap] = true;
+                    }
                 }
             }
 
             // Add the role
-            add_role($role_slug, $role_name, $capabilities);
+            add_role($role_slug, $custom_role_name, $capabilities);
         }
 
         $default_role = $role_slug;
@@ -608,7 +696,7 @@ function juc_process_json_file()
     }
 
     echo '<div class="mt-4 p-4 bg-green-100 text-green-700 rounded-lg">
-            <p>Created ' . $created . ' users. Errors: ' . $errors . '</p>
+            <p>Created ' . esc_html($created) . ' users. Errors: ' . esc_html($errors) . '</p>
           </div>';
 }
 
