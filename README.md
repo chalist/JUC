@@ -1,29 +1,37 @@
 # JSON User Creator Documentation
+# مستندات افزونه JSON User Creator
 
-## Overview
+[English](#english) | [فارسی](#persian)
+
+<a name="english"></a>
+## English
+
+### Overview
 JSON User Creator allows you to bulk create WordPress users from a JSON file. It supports mapping JSON fields to user attributes and handles Persian/Arabic text conversion.
 
-## How to Use
+> **⚠️ IMPORTANT**: This plugin was developed for personal use and may contain bugs. Please backup your database before using it.
+
+### How to Use
 1. Upload a JSON file containing user data
 2. Map JSON fields to WordPress user fields (Username, Email, First Name, Last Name)
 3. Preview the mapped data in real-time
 4. Optionally enable post author updates
 5. Click "Create Users" to process the import
 
-## Features
+### Features
 - Automatic Persian/Arabic to English conversion for usernames
 - Automatic email generation if not provided
 - Real-time preview of converted data
 - Post author update capability
 - Duplicate username handling
 
-## JSON Format
+### JSON Format
 Your JSON file should be an array of objects containing user data. Example:
 
 ```json
 [
     {
-        "name": "John Doe",
+        "username": "john-doe",
         "email": "john@example.com",
         "first_name": "John",
         "last_name": "Doe",
@@ -32,7 +40,7 @@ Your JSON file should be an array of objects containing user data. Example:
 ]
 ```
 
-## Contributing
+### Contributing
 This plugin is intentionally kept simple and straightforward. However, there's always room for improvement! If you:
 - Find any bugs or issues
 - Have ideas for new features
@@ -46,4 +54,61 @@ Please feel free to:
 
 Your contributions, no matter how small, are greatly appreciated and will help make this plugin better for everyone!
 
-If you need anything, feel free to contact me on telegram: [@chalist](https://t.me/chalist) or send email to: [chalist1@gmail.com](mailto:chalist1@gmail.com)
+---
+
+<a name="persian"></a>
+## فارسی
+
+### نمای کلی
+JSON User Creator به شما امکان می‌دهد تا کاربران وردپرس را به صورت گروهی از طریق فایل JSON ایجاد کنید. این افزونه از نگاشت فیلدهای JSON به ویژگی‌های کاربر پشتیبانی می‌کند و تبدیل متن فارسی/عربی را مدیریت می‌کند.
+
+> **⚠️ مهم**: این افزونه برای استفاده شخصی نوشته شده است و ممکن است اشکالات فراوانی داشته باشد. در نتیجه پیش از استفاده از دیتابیس خود بک‌آپ بگیرید.
+
+### نحوه استفاده
+۱. آپلود فایل JSON حاوی اطلاعات کاربران
+۲. نگاشت فیلدهای JSON به فیلدهای کاربری وردپرس (نام کاربری، ایمیل، نام، نام خانوادگی)
+۳. پیش‌نمایش داده‌های نگاشت شده به صورت بلادرنگ
+۴. فعال‌سازی اختیاری به‌روزرسانی نویسنده پست‌ها
+۵. کلیک روی "ایجاد کاربران" برای پردازش ورود اطلاعات
+
+### ویژگی‌ها
+- تبدیل خودکار متن فارسی/عربی به انگلیسی برای نام‌های کاربری
+- تولید خودکار ایمیل در صورت عدم ارائه
+- پیش‌نمایش بلادرنگ داده‌های تبدیل شده
+- قابلیت به‌روزرسانی نویسنده پست‌ها
+- مدیریت نام‌های کاربری تکراری
+
+### قالب JSON
+فایل JSON شما باید آرایه‌ای از اشیاء حاوی اطلاعات کاربر باشد. مثال:
+
+```json
+[
+    {
+        "name": "ali-ahmadi",
+        "email": "ali.ahmadi@example.com",
+        "first_name": "علی",
+        "last_name": "احمدی",
+        "post_id": [12, 121, 332, 45]
+    }
+]
+```
+
+### مشارکت
+این افزونه عمداً ساده و سرراست نگه داشته شده است. با این حال، همیشه جای پیشرفت وجود دارد! اگر شما:
+- باگ یا مشکلی پیدا کردید
+- ایده‌ای برای ویژگی‌های جدید دارید
+- می‌خواهید مستندات را بهبود دهید
+- فرصت‌هایی برای بهینه‌سازی کد می‌بینید
+
+لطفاً:
+۱. یک issue باز کنید تا باگ‌ها را گزارش یا ویژگی‌های جدید را پیشنهاد دهید
+۲. یک pull request با بهبودهای خود ارسال کنید
+۳. پروژه را fork کنید و روی آن توسعه دهید
+
+مشارکت‌های شما، هر چقدر هم کوچک، بسیار ارزشمند هستند و به بهتر شدن این افزونه برای همه کمک خواهند کرد!
+
+---
+
+### Contact | تماس
+Telegram: [@chalist](https://t.me/chalist)  
+Email: [chalist1@gmail.com](mailto:chalist1@gmail.com)
