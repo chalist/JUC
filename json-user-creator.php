@@ -6,7 +6,7 @@
  * Version: 1.0.0
  * Author: Chalist
  * Author URI: https://github.com/chalist
- * Text Domain: json-to-users
+ * Text Domain: user-creator-by-json
  * Domain Path: /languages
  * License: GPL v2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -90,12 +90,12 @@ function juc_handle_form_submission()
             'juc_upload_users'
         )
     ) {
-        wp_die(__('Security check failed. Please try again.', 'json-to-users'));
+        wp_die(esc_html__('Security check failed. Please try again.', 'user-creator-by-json'));
     }
 
     // Verify user capabilities
     if (!current_user_can('manage_options')) {
-        wp_die(__('Unauthorized access', 'json-to-users'));
+        wp_die(esc_html__('Unauthorized access', 'user-creator-by-json'));
     }
 
     // Check file upload
@@ -108,7 +108,7 @@ function juc_handle_form_submission()
         add_settings_error(
             'json_user_creator',
             'no_file',
-            __('No file was uploaded or there was an upload error.', 'json-to-users'),
+            __('No file was uploaded or there was an upload error.', 'user-creator-by-json'),
             'error'
         );
         return;
@@ -122,7 +122,7 @@ function juc_handle_form_submission()
         add_settings_error(
             'json_user_creator',
             'read_error',
-            __('Could not read the uploaded file.', 'json-to-users'),
+            __('Could not read the uploaded file.', 'user-creator-by-json'),
             'error'
         );
         return;
@@ -134,7 +134,7 @@ function juc_handle_form_submission()
         add_settings_error(
             'json_user_creator',
             'invalid_json',
-            __('Invalid JSON file format.', 'json-to-users'),
+            __('Invalid JSON file format.', 'user-creator-by-json'),
             'error'
         );
         return;
@@ -719,3 +719,13 @@ function role_exists($role)
     }
     return false;
 }
+
+// Add proper text domain loading
+function juc_load_textdomain() {
+    load_plugin_textdomain(
+        'user-creator-by-json',
+        false,
+        dirname(plugin_basename(__FILE__)) . '/languages'
+    );
+}
+add_action('plugins_loaded', 'juc_load_textdomain');
