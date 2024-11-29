@@ -24,6 +24,7 @@ JSON User Creator allows you to bulk create WordPress users from a JSON file. It
 - Real-time preview of converted data
 - Post author update capability
 - Duplicate username handling
+- Bulk update of post authors using post_id field
 
 ### JSON Format
 Your JSON file should be an array of objects containing user data. Example:
@@ -35,10 +36,12 @@ Your JSON file should be an array of objects containing user data. Example:
         "email": "john@example.com",
         "first_name": "John",
         "last_name": "Doe",
-        "post_id": [12, 121, 332, 45]
+        "post_id": [12, 121, 332, 45]  // Posts that will be assigned to this user
     }
 ]
 ```
+
+The `post_id` field allows you to specify which posts should be authored by each user. When provided, the plugin will automatically update the author of these posts to the newly created user.
 
 ### Contributing
 This plugin is intentionally kept simple and straightforward. However, there's always room for improvement! If you:
@@ -77,6 +80,9 @@ JSON User Creator به شما امکان می‌دهد تا کاربران ور�
 - پیش‌نمایش بلادرنگ داده‌های تبدیل شده
 - قابلیت به‌روزرسانی نویسنده پست‌ها
 - مدیریت نام‌های کاربری تکراری
+- به‌روزرسانی گروهی نویسنده پست‌ها با استفاده از فیلد post_id
+
+فیلد `post_id` به شما امکان می‌دهد مشخص کنید که کدام پست‌ها باید توسط هر کاربر نوشته شوند. هنگامی که این فیلد ارائه می‌شود، افزونه به طور خودکار نویسنده این پست‌ها را به کاربر جدید تغییر می‌دهد.
 
 ### قالب JSON
 فایل JSON شما باید آرایه‌ای از اشیاء حاوی اطلاعات کاربر باشد. مثال:
@@ -84,7 +90,7 @@ JSON User Creator به شما امکان می‌دهد تا کاربران ور�
 ```json
 [
     {
-        "name": "ali-ahmadi",
+        "username": "ali-ahmadi",
         "email": "ali.ahmadi@example.com",
         "first_name": "علی",
         "last_name": "احمدی",
