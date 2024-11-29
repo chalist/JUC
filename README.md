@@ -1,4 +1,4 @@
-=== JSON User Creator ===
+=== User Creator by JSON ===
 Contributors: chalist
 Tags: users, json, bulk import, persian, arabic
 Requires at least: 5.0

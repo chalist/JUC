@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: JSON User Creator code
+ * Plugin Name: User Creator by JSON
  * Plugin URI: https://github.com/chalist/json-user-creator
  * Description: Bulk create WordPress users from a JSON file with support for Persian/Arabic text conversion
  * Version: 1.0.0
@@ -70,6 +70,14 @@ function juc_enqueue_assets($hook)
         filemtime(plugin_dir_path(__FILE__) . 'assets/js/admin.js'),
         true
     );
+
+    wp_enqueue_script(
+        'juc-admin-script',
+        plugins_url('assets/js/admin.js', __FILE__),
+        array('jquery'),
+        filemtime(plugin_dir_path(__FILE__) . 'assets/js/admin.js'),
+        true
+    );
 }
 add_action('admin_enqueue_scripts', 'juc_enqueue_assets');
 
@@ -116,18 +124,8 @@ function juc_handle_form_submission()
 
     // Read and parse JSON file
     $tmp_file = sanitize_text_field(wp_unslash($_FILES['json_file']['tmp_name']));
-    $json_content = file_get_contents($tmp_file);
-    
-    if (false === $json_content) {
-        add_settings_error(
-            'json_user_creator',
-            'read_error',
-            __('Could not read the uploaded file.', 'user-creator-by-json'),
-            'error'
-        );
-        return;
-    }
-
+    // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+    $json_content = file_get_contents(sanitize_text_field($_FILES['json_file']['tmp_name']));
     $users_data = json_decode($json_content, true);
 
     if (json_last_error() !== JSON_ERROR_NONE) {
@@ -284,19 +282,7 @@ function juc_handle_form_submission()
 // Create the admin page
 function juc_admin_page()
 {
-    // Add Tailwind CSS CDN
-    wp_enqueue_style('tailwindcss', 'https://cdn.tailwindcss.com');
-
-    // Add Tailwind configuration script
 ?>
-    <script>
-        tailwind.config = {
-            prefix: '', // Add prefix to avoid conflicts
-            corePlugins: {
-                preflight: false, // Disable Tailwind's reset
-            }
-        }
-    </script>
 
     <div class="wrap">
         <h1 class="text-3xl font-bold mb-6">JSON User Creator</h1>
